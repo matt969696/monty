@@ -73,5 +73,52 @@ void pstr(stack_t **stack, __attribute__((unused)) unsigned int line_number)
  */
 void rotl(stack_t **stack, __attribute__((unused)) unsigned int line_number)
 {
+	int val;
+	stack_t *head;
 
+	head = *stack;
+
+	if (head == NULL || head->next == NULL)
+		return;
+
+	val = head->n;
+	while (head->next != NULL)
+	{
+		head->n = head->next->n;
+		head = head->next;
+	}
+	head->n = val;
+}
+
+
+
+/**
+ * rotr -  rotates the stack to the bottom
+ * @stack: pointer to the head of the stack
+ * @line_number: line number
+ *
+ * Return: none
+ */
+void rotr(stack_t **stack, __attribute__((unused)) unsigned int line_number)
+{
+	int val1, val2;
+	stack_t *head, *init;
+
+	head = *stack;
+	init = *stack;
+
+	if (head == NULL || head->next == NULL)
+		return;
+
+	val1 = head->n;
+	head = head->next;
+	while (head != NULL)
+	{
+		val2 = head->n;
+		head->n = val1;
+		val1 = val2;
+		head = head->next;
+	}
+
+	init->n = val1;
 }

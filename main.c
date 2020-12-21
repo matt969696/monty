@@ -90,7 +90,8 @@ void exec_func(char *ope, stack_t **stack, unsigned int ln)
 	instruction_t inst[] = {
 		{"pall", pall}, {"pint", pint}, {"pop", pop}, {"swap", swap},
 		{"add", add}, {"sub", sub}, {"div", divs}, {"mul", mul},
-		{"mod", mod}, {"pchar", pchar}, {"pstr", pstr},
+		{"mod", mod}, {"pchar", pchar}, {"pstr", pstr}, {"rotl", rotl},
+		{"rotr", rotr},
 		{NULL, NULL}
 	};
 
