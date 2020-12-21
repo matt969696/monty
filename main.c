@@ -8,29 +8,29 @@
  */
 int main(int ac, char **av)
 {
-	FILE *file;
-	char *line = NULL, *token = NULL, ope[1024];
+	char *token = NULL, ope[1024];
 	size_t len = 0;
 	ssize_t read;
 	unsigned int ln = 0;
 	stack_t *stack = NULL;
-	int stacktype = 0, ret;
 
 	if (ac != 2)
 	{
 		fprintf(stderr, "USAGE: monty file\n");
 		exit(EXIT_FAILURE);
 	}
-	file = fopen(av[1], "r");
-	if (file == NULL)
+	param.file = fopen(av[1], "r");
+	if (param.file == NULL)
 	{
 		fprintf(stderr, "Error: Can't open file %s\n", av[1]);
 		exit(EXIT_FAILURE);
 	}
-	while ((read = getline(&line, &len, file)) != -1)
+	param.lastexit = 0;
+	param.stacktype = 0;
+	while ((read = getline(&param.line, &len, param.file)) != -1)
 	{
 		ln++;
-		token = strtok(line, "\n\t\r ");
+		token = strtok(param.line, "\n\t\r ");
 		if (token == '\0')
 			continue;
 		if (token == NULL || token[0] == '#' || strcmp(token, "nop") == 0)
@@ -39,26 +39,24 @@ int main(int ac, char **av)
 		if (strcmp(ope, "push") == 0)
 		{
 			token = strtok(NULL, "\n\t\r ");
-			ret = push(&stack, token, ln, stacktype);
+			push(&stack, token, ln);
 		}
 		else
-			ret = exec_func(ope, &stack, ln, &stacktype);
-		if (ret != 0)
+			exec_func(ope, &stack, ln);
+		if (param.lastexit != 0)
 			break;
 	}
-	properexit(stack, file, line);
-	return (ret);
+	properexit(stack);
+	return (param.lastexit);
 }
 
 
 /**
  * properexit - exit the stack program
  * @stack: stack to free
- * @file: file to close
- * @line: line to free
  * Return: Void
  */
-void properexit(stack_t *stack, FILE *file, char *line)
+void properexit(stack_t *stack)
 {
 	stack_t *hnext;
 
@@ -69,8 +67,8 @@ void properexit(stack_t *stack, FILE *file, char *line)
 		stack = hnext;
 	}
 
-	free(line);
-	fclose(file);
+	free(param.line);
+	fclose(param.file);
 }
 
 
@@ -82,44 +80,41 @@ void properexit(stack_t *stack, FILE *file, char *line)
  * @ope: name of the command
  * @stack: current stack
  * @ln: line number
- * @stacktype: type of stack
  * Return: 0 on success, EXIT_FAILURE on error
  */
 
-int exec_func(char *ope, stack_t **stack, unsigned int ln, int *stacktype)
+void exec_func(char *ope, stack_t **stack, unsigned int ln)
 {
 	int i = 0;
 
 	instruction_t inst[] = {
-		{"pall", pall},
+		{"pall", pall}, {"pint", pint}, {"pop", pop}, {"swap", swap},
+		{"add", add}, {"sub", sub}, {"div", divs}, {"mul", mul},
+		{"mod", mod}, {"pchar", pchar}, {"pstr", pstr},
 		{NULL, NULL}
 	};
 
 	if (strcmp(ope, "stack") == 0)
 	{
-		*stacktype = 0;
-		return (0);
+		param.stacktype = 0;
+		return;
 	}
-
 	if (strcmp(ope, "queue") == 0)
 	{
-		*stacktype = 1;
-		return (0);
+		param.stacktype = 1;
+		return;
 	}
-
-
 	while (inst[i].opcode)
 	{
 		if (strcmp(ope, inst[i].opcode) == 0)
 		{
 			inst[i].f(stack, ln);
-			return (0);
+			return;
 		}
 		i++;
 	}
-
 	fprintf(stderr, "L%u: unknown instruction %s\n", ln, ope);
-	return (EXIT_FAILURE);
+	param.lastexit = EXIT_FAILURE;
 }
 
 

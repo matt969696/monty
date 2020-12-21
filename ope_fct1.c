@@ -5,18 +5,18 @@
  * @stack: pointer to the head of the stack
  * @val: value token
  * @ln: line number
- * @stacktype: type of stack
  *
  * Return: 0 on success, EXIT_FAILURE on error
  */
-int push(stack_t **stack, char *val, unsigned int ln, int stacktype)
+void push(stack_t **stack, char *val, unsigned int ln)
 {
 	unsigned int i = 0;
 
 	if (val == NULL || val[0] == '\0')
 	{
 		fprintf(stderr, "L%u: usage: push integer\n", ln);
-		return (EXIT_FAILURE);
+		param.lastexit = EXIT_FAILURE;
+		return;
 	}
 
 	i = 0;
@@ -27,15 +27,15 @@ int push(stack_t **stack, char *val, unsigned int ln, int stacktype)
 		if (isdigit(val[i]) == 0)
 		{
 			fprintf(stderr, "L%u: usage: push integer\n", ln);
-			return (EXIT_FAILURE);
+			param.lastexit = EXIT_FAILURE;
+			return;
 		}
 	}
-	if (stacktype == 0)
+	if (param.stacktype == 0)
 		add_node(stack, atoi(val));
 	else
 		add_node_end(stack, atoi(val));
 
-	return (0);
 }
 
 
@@ -55,7 +55,8 @@ stack_t *add_node(stack_t **head, const int val)
 	if (new == NULL)
 	{
 		fprintf(stderr, "Error: malloc failed\n");
-		exit(EXIT_FAILURE);
+		param.lastexit = EXIT_FAILURE;
+		return (NULL);
 	}
 	new->n = val;
 	new->next = *head;
@@ -85,7 +86,8 @@ stack_t *add_node_end(stack_t **head, const int val)
 	if (new == NULL)
 	{
 		fprintf(stderr, "Error: malloc failed\n");
-		exit(EXIT_FAILURE);
+		param.lastexit = EXIT_FAILURE;
+		return (NULL);
 	}
 
 	new->n = val;
